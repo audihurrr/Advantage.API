@@ -75,9 +75,12 @@ namespace Advantage.API
 
             string newName = GenerateRandomCustomer();
 
-            return names.Contains(newName) ? 
-                GenerateRandomUniqueCustomer(names) :
-                newName;
+            if (names.Contains(newName)) 
+            {
+                GenerateRandomUniqueCustomer(names);
+            } 
+
+            return newName;
         }
 
 
@@ -91,6 +94,15 @@ namespace Advantage.API
             string suffix = GetRandom(_businessSuffix);
 
             return prefix + " " + suffix;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        internal static decimal GetRandomOrderTotal()
+        {
+            return _rand.Next(100, 5000);
         }
 
         /// <summary>
@@ -113,6 +125,36 @@ namespace Advantage.API
             return $"contact@{emailAt}_{DateTime.Now:fff}.com";
         }
 
+        internal static DateTime GetRandomOrderPlaced()
+        {
+            var end  = DateTime.Now;
+            var start = end.AddDays(-90);
+
+            TimeSpan possibleSpan = end - start;
+            TimeSpan newSpan = new TimeSpan(0, _rand.Next(0, (int)possibleSpan.TotalMinutes), 0);
+            
+            return start + newSpan;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderPlaced"></param>
+        /// <returns></returns>
+        internal static DateTime? GetRandomOrderCompleted(DateTime orderPlaced)
+        {
+            var now = DateTime.Now;
+
+            var minLeadTime = TimeSpan.FromDays(7);
+            var timePassed = now - orderPlaced;
+
+            if (timePassed < minLeadTime)
+            {
+                return null;
+            }
+
+            return orderPlaced.AddDays(_rand.Next(7, 14));
+        }
         /// <summary>
         /// 
         /// </summary>
