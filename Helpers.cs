@@ -122,7 +122,7 @@ namespace Advantage.API
         /// <returns></returns>
         internal static string GenerateRandomEmail(string emailAt)
         {
-            return $"contact@{emailAt}_{DateTime.Now:fff}.com";
+            return $"contact@{emailAt.Replace(" ", "").ToLower()}_{DateTime.Now:fff}.com";
         }
 
         internal static DateTime GetRandomOrderPlaced()

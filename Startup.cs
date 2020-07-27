@@ -53,12 +53,14 @@ namespace Advantage.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                //endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                    name: "default", 
+                    pattern: "api/{controller}/{action}/{id?}");
             });
         }
     }
