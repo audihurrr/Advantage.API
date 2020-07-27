@@ -44,7 +44,7 @@ namespace Advantage.API.Controllers
             _context.Customers.Add(customer);
             _context.SaveChanges();
 
-            return CreatedAtRoute("GetCustomer", new Customer(){ Id = customer.Id }, customer);
+            return CreatedAtRoute("GetCustomer", new { id = customer.Id }, customer);
         }
     }
 }
