@@ -28,7 +28,9 @@ namespace Advantage.API.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(_context.Orders.OrderBy(order => order.Id));
+            return Ok(_context.Orders
+                .Include(o => o.Customer)
+                .OrderBy(order => order.Id));
         }
 
         /// <summary>
@@ -39,7 +41,9 @@ namespace Advantage.API.Controllers
         [HttpGet("{id:int}", Name = "GetOrder")]
         public IActionResult Get(int id)
         {
-            var order = _context.Orders.First(order => order.Id == id);
+            var order = _context.Orders
+                .Include(o => o.Customer)
+                .First(order => order.Id == id);
             return Ok(order);
         }
 
@@ -73,7 +77,9 @@ namespace Advantage.API.Controllers
         [HttpGet("ByState")]
         public IActionResult ByState()
         {
-            var orders  = _context.Orders.Include(o => o.Customer).ToList();
+            var orders  = _context.Orders
+                .Include(o => o.Customer)
+                .ToList();
 
             var groupedOrders = orders.GroupBy(o => o.Customer.State)
                 .ToList()
@@ -87,10 +93,17 @@ namespace Advantage.API.Controllers
             return Ok(groupedOrders);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
         [HttpGet("ByCustomer/{n:int}")]
         public IActionResult ByCustomer(int n)
         {
-            var orders = _context.Orders.Include(o => o.Customer).ToList();
+            var orders = _context.Orders
+                .Include(o => o.Customer)
+                .ToList();
 
             var groupedOrders = orders.GroupBy(o => o.Customer.Id)
                 .ToList()
