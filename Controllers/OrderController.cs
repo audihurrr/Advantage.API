@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using Advantage.API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Advantage.API.Controllers
 {
@@ -34,33 +36,73 @@ namespace Advantage.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("{id}", Name = "GetOrder")]
+        [HttpGet("{id:int}", Name = "GetOrder")]
         public IActionResult Get(int id)
         {
             var order = _context.Orders.First(order => order.Id == id);
             return Ok(order);
         }
 
-        [HttpGet("{pageNumber}/{resultsPerPage}")]
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <param name="resultsPerPage"></param>
+        /// <returns></returns>
+        [HttpGet("{pageNumber:int}/{resultsPerPage:int}")]
         public IActionResult Get(int pageNumber, int resultsPerPage)
         {
-            var orders = new List<Order>();
-            var startIndex = pageNumber * resultsPerPage;
-            var endIndex = startIndex + resultsPerPage;
+            var data = _context.Orders.
+                Include(o => o.Customer).
+                OrderByDescending(c => c.Placed);
 
-            if (startIndex > _context.Orders.Count())
+            var page = new PaginatedResponse<Order>(data, pageNumber, resultsPerPage);
+
+            var totalCount = page.Total;
+            var totalPages = Math.Ceiling((double) totalCount / resultsPerPage);
+
+            var response = new 
             {
-                return BadRequest();
-            }
-            
-            if (endIndex > _context.Orders.Count())
-            {
-                endIndex = _context.Orders.Count();
-            }
+                Page = page,
+                TotalPages = totalPages
+            };
 
-            orders.AddRange(_context.Orders.Skip(startIndex).Take(endIndex - startIndex).ToList());
+            return Ok(response);
+        }
 
-            return Ok(orders);
+        [HttpGet("ByState")]
+        public IActionResult ByState()
+        {
+            var orders  = _context.Orders.Include(o => o.Customer).ToList();
+
+            var groupedOrders = orders.GroupBy(o => o.Customer.State)
+                .ToList()
+                .Select(grp => new
+                {
+                    State = grp.Key,
+                    Total = grp.Sum(x => x.Total)
+                }).OrderBy(res => res.Total)
+                .ToList();
+
+            return Ok(groupedOrders);
+        }
+
+        [HttpGet("ByCustomer/{n:int}")]
+        public IActionResult ByCustomer(int n)
+        {
+            var orders = _context.Orders.Include(o => o.Customer).ToList();
+
+            var groupedOrders = orders.GroupBy(o => o.Customer.Id)
+                .ToList()
+                .Select(grp => new 
+                {
+                    Name = _context.Customers.Find(grp.Key).Name,
+                    Total = grp.Sum(x => x.Total)
+                }).OrderByDescending(res => res.Total)
+                .Take(n)
+                .ToList();
+
+            return Ok(groupedOrders);
         }
 
         /// <summary>
