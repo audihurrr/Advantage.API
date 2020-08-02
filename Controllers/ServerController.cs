@@ -35,11 +35,34 @@ namespace Advantage.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("{id}", Name="GetServer")]
+        [HttpGet("{id:int}", Name="GetServer")]
         public IActionResult Get(int id)
         {
-            var server = _context.Servers.First(s => s.Id == id);
+            var server = _context.Servers.Find(id);
             return Ok(server);
+        }
+
+        [HttpPut("{id:int}")]
+        public IActionResult Message(int id, [FromBody] ServerMessage srvrMsg)
+        {
+            var server = _context.Servers.Find(id);
+            if (server == null)
+            {
+                NotFound();
+            }
+
+            if (srvrMsg.Payload == "activate")
+            {
+                server.IsOnline = true;
+            }
+
+            if (srvrMsg.Payload == "deactivate")
+            {
+                server.IsOnline = false;
+            }
+            _context.SaveChanges();
+
+            return new NoContentResult();
         }
     }
 }
