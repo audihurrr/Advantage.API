@@ -51,6 +51,7 @@ namespace Advantage.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseCors("DefaultPolicy");
             }
 
             seed.SeedData(20, 1000);
