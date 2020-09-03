@@ -87,7 +87,7 @@ namespace Advantage.API.Controllers
                 {
                     State = grp.Key,
                     Total = grp.Sum(x => x.Total)
-                }).OrderBy(res => res.Total)
+                }).OrderByDescending(res => res.Total)
                 .ToList();
 
             return Ok(groupedOrders);
